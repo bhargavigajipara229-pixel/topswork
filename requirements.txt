@@ -5,3 +5,4 @@ numpy
 joblib
 pydantic
 pandas
+mysql-connector-python
