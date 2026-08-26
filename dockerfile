@@ -1,30 +1,13 @@
-on:
-  push:
-    branches:
-      - main
+FROM python:3.12-slim
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+WORKDIR /app
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+COPY requirements.txt .
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+RUN pip install --no-cache-dir -r requirements.txt
 
-      - name: Build Docker Image
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/salary-api:latest .
+COPY . .
 
-      - name: Push Docker Image
-        run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/salary-api:latest
+EXPOSE 8000
 
-      - name: Trigger Render Deploy
-        run: |
-          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+CMD ["sh", "-c", "uvicorn api:app --host 0.0.0.0 --port ${PORT:-8000}"]
